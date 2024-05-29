@@ -22,35 +22,40 @@ def generate_launch_description():
     world_file_name = 'dirt_path_curves.world'
     pkg_dir = get_package_share_directory('jetbot_ros')
  
-    os.environ["GAZEBO_MODEL_PATH"] = os.path.join(pkg_dir, 'models')
+    os.environ["GZ_SIM_RESOURCE_PATH"] = os.path.join(pkg_dir, 'models')
  
     world = os.path.join(pkg_dir, 'worlds', world_file_name)
+    print(str(world))
     launch_file_dir = os.path.join(pkg_dir, 'launch')
- 
-    gazebo = ExecuteProcess(
-                cmd=['gazebo', '--verbose', world, 
-                     '-s', 'libgazebo_ros_init.so', 
-                     '-s', 'libgazebo_ros_factory.so',
-                     '-g', 'libgazebo_user_camera_control_system.so'],
-                output='screen', emulate_tty=True)
 
-    
-    spawn_entity = Node(package='jetbot_ros', node_executable='gazebo_spawn',   # FYI 'node_executable' is renamed to 'executable' in Foxy
-                        parameters=[
-                            {'name': LaunchConfiguration('robot_name')},
-                            {'model': LaunchConfiguration('robot_model')},
-                            {'x': LaunchConfiguration('x')},
-                            {'y': LaunchConfiguration('y')},
-                            {'z': LaunchConfiguration('z')},
-                        ],
-                        output='screen', emulate_tty=True)
+    gazebo = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([os.path.join(
+            get_package_share_directory('ros_gz_sim'), 'launch/'),
+            'gz_sim.launch.py'
+        ]),
+        launch_arguments=[
+            ('gz_args', str(world + ' -v 4'))
+        ]
+    )
+
+    spawn_jetbot = Node(
+        package='ros_gz_sim',
+        executable='create',
+        name='spawn_jetbot',
+        arguments=[
+            '-world', 'default',
+            '-file', str(os.path.join(pkg_dir, 'models/', 'jetbot/', 'model.sdf')),
+            '-x', LaunchConfiguration('x'),
+            '-y', LaunchConfiguration('y'),
+            '-z', LaunchConfiguration('z'),
+        ]
+    )
  
     return LaunchDescription([
         robot_name,
-        robot_model,
-        robot_x,
+        robot_model, robot_x,
         robot_y,
         robot_z,
         gazebo,
-        spawn_entity,
+        spawn_jetbot,
     ])

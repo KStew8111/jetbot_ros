@@ -11,10 +11,25 @@
 			</sky>
 		</scene> 
 
-		<!-- A global light source -->
-		<include>
-			<uri>model://sun</uri>
-		</include>
+    <light name='directional_light' type='directional'>
+      <pose>0 0 20 0 0 0</pose>
+      <cast_shadows>true</cast_shadows>
+      <intensity>0.5</intensity>
+      <direction>1 1 -1</direction>
+      <diffuse>1 1 0 1</diffuse>
+      <specular>0.100000001 0.100000001 0.100000001 1</specular>
+      <attenuation>
+        <range>50</range>
+        <linear>0.20000000000000001</linear>
+        <constant>0.80000000000000004</constant>
+        <quadratic>0.01</quadratic>
+      </attenuation>
+      <spot>
+        <inner_angle>0</inner_angle>
+        <outer_angle>0</outer_angle>
+        <falloff>0</falloff>
+      </spot>
+    </light>
 		
 		<!-- A ground plane -->
 		<include>
